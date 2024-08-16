@@ -1,12 +1,15 @@
+import sys
 import asyncio
 import logging
-import sys
+import aiohttp
 import requests
+
+from aiogram.types import Message
 from aiogram import Bot, Dispatcher
-from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.client.default import DefaultBotProperties
+
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,12 +23,22 @@ users = {}
 
 @dp.message(CommandStart())
 async def command_start(message: Message) -> None:
-    code = message.text.split(' ')[1]
-    res = requests.post(f'{NODE}/api/users/telegram/check_code', json={'code': code})
-    if res.text != 'false':
+    try:
+        code = message.text.split(" ")[1]
+    except:
+        await message.reply("You are not authorized")
+        return
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            f"{NODE}/api/users/telegram/check_code", json={"code": code}
+        ) as response:
+            res_text = await response.text()
+    if res_text != "false":
         async with async_session_maker() as session:
             session: AsyncSession
-            stmt = insert(User).values({'tg_user_id': message.from_user.id, 'main_api_user_id': int(res.text)})
+            stmt = insert(User).values(
+                {"tg_user_id": message.from_user.id, "main_api_user_id": int(res_text)}
+            )
             await session.execute(stmt)
             await session.commit()
     else:
@@ -39,23 +52,32 @@ async def message(message: Message):
 
         stmt = select(User).filter(User.tg_user_id == message.from_user.id)
         user: User = await session.execute(stmt)
-        if user:
-            try:
-                res = requests.post(f'{NODE}/api/v1/user/bot_word',
-                                    json={'secret': SECRET,
-                                          'user_id': users[message.from_user.id],
-                                          'text': message.text})
-                if user.notice:
-                    user.notice = False
-                    await session.commit()
-                if res.status_code == 400:
-                    if not user.notice:
-                        user_id = message.from_user.id
-                        await bot.send_message(user_id, f'You need to subscribe to use this bot')
-                        user.notice = True
+        if not user:
+            return
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{NODE}/api/v1/user/bot_word",
+                    json={
+                        "secret": SECRET,
+                        "user_id": users[message.from_user.id],
+                        "text": message.text,
+                    },
+                ) as response:
+                    if user.notice:
+                        user.notice = False
                         await session.commit()
-            except:
-                pass
+                    if response.status_code == 400:
+                        if not user.notice:
+                            user_id = message.from_user.id
+                            await bot.send_message(
+                                user_id, f"You need to subscribe to use this bot"
+                            )
+                            user.notice = True
+                            await session.commit()
+        except:
+            return
 
 
 async def main() -> None:
