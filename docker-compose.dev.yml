@@ -16,7 +16,7 @@ services:
   bot:
     build: .
     command: >
-      /bin/sh -c "alembic upgrade head && python main.py"
+      /bin/sh -c "alembic -c src/alembic.ini upgrade head && python main.py"
     restart: always
     volumes:
       - ./:/bot
