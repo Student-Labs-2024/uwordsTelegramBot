@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from instance import (
+from src.config.instance import (
     POSTGRES_DB,
     POSTGRES_HOST,
     POSTGRES_PORT,

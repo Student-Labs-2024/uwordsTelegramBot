@@ -18,12 +18,12 @@ aiohhtp, aiogram
 ## Запуск проекта
 Чтобы сделать миграцию к БД, нужно прописать в контейнере docker следующую команду
 ```shell
-alembic revision --autogenerate -m "комментарий для миграции"
+alembic -c src/alembic.ini revision --autogenerate -m "комментарий для миграции"
 ```
 
 Применить миграции
 ```shell
-alembic upgrade head
+alembic -c src/alembic.ini upgrade head
 ```
 
 Запуск проекта на локальной машине
@@ -40,12 +40,12 @@ pre-commit install --hook-type commit-msg
 
 Перед коммитом проверять код линтером Black
 ```shell
-python -m black . --check
+python -m black ./src --check
 ```
 
 В случае замечаний линтера выполнить команду
 ```shell
-python -m black .
+python -m black ./src
 ```
 
 Пример .env можно увидеть в следующих файлах:
