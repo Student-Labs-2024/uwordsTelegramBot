@@ -6,7 +6,7 @@ services:
     container_name: bot_db
     command: -p 5434
     ports:
-      - "5433:5434"
+      - "5434:5434"
     env_file:
       - ./.env.dev.db
     restart: always
