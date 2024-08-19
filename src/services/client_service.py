@@ -14,11 +14,10 @@ async def check_code(code: str) -> int:
             async with session.post(
                 f"{NODE}/api/users/telegram/check_code", json={"code": code}
             ) as response:
-                if response.status != 200:
-                    return None
+                response.raise_for_status()
 
-                res_text = await response.text()
-                user_id: int = res_text.get("user_id")
+                res_json = await response.json()
+                user_id: int = res_json.get("user_id")
                 return user_id
     except Exception as e:
         logger.info(f"[CHECK CODE] Error: {e}")
@@ -36,9 +35,11 @@ async def send_text(app_id: int, text: str):
                     "text": text,
                 },
             ) as response:
-                if response.status_code == 400:
-                    return False
+                response.raise_for_status()
+
+                text = await response.text()
+
                 return True
     except Exception as e:
-        logger.info(f"[SEND TEXT] Error: {e}")
+        logger.info(f"[SEND TEXT] Error: {text}")
         return False
