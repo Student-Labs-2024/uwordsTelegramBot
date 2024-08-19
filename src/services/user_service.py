@@ -32,9 +32,9 @@ async def get_user(telegram_id: int) -> User:
             session: AsyncSession
 
             stmt = select(User).filter(User.tg_user_id == telegram_id)
-            user = await session.execute(stmt)
+            res = await session.execute(stmt)
 
-            return user
+            return res.scalar_one_or_none()
 
     except Exception as e:
         logger.info(f"[GET] Error: {e}")
