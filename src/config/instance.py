@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-SECRET = os.environ.get("SECRET")
-NODE = os.environ.get("NODE")
+APP_TOKEN = os.environ.get("APP_TOKEN")
+APP_URL = os.environ.get("APP_URL")
 
 POSTGRES_DB: str = os.environ.get("POSTGRES_DB")
 POSTGRES_HOST: str = os.environ.get("POSTGRES_HOST")

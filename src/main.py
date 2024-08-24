@@ -34,12 +34,12 @@ async def command_start(message: Message) -> None:
         return await message.reply(bot_messages.NOT_AUTHORIZED)
 
     try:
-        app_id = await check_code(code=code)
+        uwords_uid = await check_code(code=code)
 
-        if not app_id:
+        if not uwords_uid:
             return await message.answer(text=bot_messages.NOT_AUTHORIZED)
 
-        await create_user(telegram_id=message.from_user.id, app_id=app_id)
+        await create_user(telegram_id=message.from_user.id, uwords_uid=uwords_uid)
 
         await message.answer(text=bot_messages.SUCCESSFULLY_REG)
 
@@ -57,7 +57,7 @@ async def message(message: Message):
         if not user:
             return await message.answer(bot_messages.NOT_AUTHORIZED)
 
-        is_send = await send_text(app_id=user.main_api_user_id, text=message.text)
+        is_send = await send_text(uwords_uid=user.uwords_uid, text=message.text)
 
         if not is_send:
             return await message.answer(text=bot_messages.NOT_SUBSCRIBE)

@@ -7,15 +7,15 @@ from src.services.user_service import create_user, get_user
 class TestUserService:
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("telegram_id, app_id", [(123456, 789), (987654, 321)])
-    async def test_create_user(self, telegram_id, app_id):
+    @pytest.mark.parametrize("telegram_id, uwords_uid", [(123456, "789"), (987654, "321")])
+    async def test_create_user(self, telegram_id, uwords_uid):
         with patch(
             "src.services.user_service.async_session_maker"
         ) as mock_session_maker:
             mock_session = AsyncMock()
             mock_session_maker.return_value.__aenter__.return_value = mock_session
 
-            result = await create_user(telegram_id, app_id)
+            result = await create_user(telegram_id=telegram_id, uwords_uid=uwords_uid)
 
             assert result is True
 
@@ -33,11 +33,11 @@ class TestUserService:
 
             mock_result = AsyncMock()
             mock_result.scalar_one_or_none.return_value = User(
-                tg_user_id=telegram_id, main_api_user_id=123, notice=True
+                tg_user_id=telegram_id, uwords_uid="123"
             )
             mock_session.execute.return_value = mock_result
 
-            result = await get_user(telegram_id)
+            result = await get_user(telegram_id=telegram_id)
 
             assert result is not None
 
