@@ -1,39 +1,42 @@
 import logging
+from typing import Dict
 import aiohttp
 
-from src.config.instance import NODE, SECRET
+from src.config.instance import APP_URL, APP_TOKEN
 
 
 logger = logging.getLogger("[SERVICES CLIENT]")
 logging.basicConfig(level=logging.INFO)
 
 
-async def check_code(code: str) -> int:
+async def check_code(code: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{NODE}/api/users/telegram/check_code", json={"code": code}
+                url=f"{APP_URL}/api/users/telegram/check_code",
+                headers={
+                    "Authorization": f"Bearer {APP_TOKEN}",
+                },
+                json={"code": code},
             ) as response:
                 response.raise_for_status()
 
-                res_json = await response.json()
-                user_id: int = res_json.get("user_id")
-                return user_id
+                res_json: Dict[str, str] = await response.json()
+                uwords_uid: int = res_json.get("uwords_uid")
+                return uwords_uid
+
     except Exception as e:
         logger.info(f"[CHECK CODE] Error: {e}")
         return None
 
 
-async def send_text(app_id: int, text: str):
+async def send_text(uwords_uid: str, text: str):
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{NODE}/api/v1/user/bot_word",
-                json={
-                    "secret": SECRET,
-                    "user_id": app_id,
-                    "text": text,
-                },
+                url=f"{APP_URL}/api/v1/user/bot_word",
+                headers={"Authorization": f"Bearer {APP_TOKEN}"},
+                json={"uwords_uid": uwords_uid, "text": text},
             ) as response:
                 response.raise_for_status()
 
@@ -41,5 +44,5 @@ async def send_text(app_id: int, text: str):
 
                 return True
     except Exception as e:
-        logger.info(f"[SEND TEXT] Error: {text}")
+        logger.info(f"[SEND TEXT] Error: {e}")
         return False

@@ -11,12 +11,12 @@ logger = logging.getLogger("[SERVICES USER]")
 logging.basicConfig(level=logging.INFO)
 
 
-async def create_user(telegram_id: int, app_id: int) -> bool:
+async def create_user(telegram_id: int, uwords_uid: str) -> bool:
     try:
         async with async_session_maker() as session:
             session: AsyncSession
             stmt = insert(User).values(
-                {"tg_user_id": telegram_id, "main_api_user_id": app_id}
+                {"tg_user_id": telegram_id, "uwords_uid": uwords_uid}
             )
             await session.execute(stmt)
             await session.commit()
