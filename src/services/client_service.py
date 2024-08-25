@@ -38,11 +38,42 @@ async def send_text(uwords_uid: str, text: str):
                 headers={"Authorization": f"Bearer {APP_TOKEN}"},
                 json={"uwords_uid": uwords_uid, "text": text},
             ) as response:
-                response.raise_for_status()
+                data = await response.text()
 
-                text = await response.text()
+                if response.status != 200:
+                    logger.info(f"[SEND TEXT] Error: {data}")
+                    return False
 
                 return True
     except Exception as e:
         logger.info(f"[SEND TEXT] Error: {e}")
+        return False
+
+
+async def send_audio(uwords_uid: str, file_path: str, filename: str, content_type: str):
+    try:
+        async with aiohttp.ClientSession() as session:
+
+            form_data = aiohttp.FormData()
+            form_data.add_field(
+                "audio_file",
+                open(file=file_path, mode="rb"),
+                filename=filename,
+                content_type=content_type,
+            )
+
+            async with session.post(
+                url=f"{APP_URL}/api/v1/user/bot_audio?uwords_uid={uwords_uid}",
+                headers={"Authorization": f"Bearer {APP_TOKEN}"},
+                data=form_data,
+            ) as response:
+                data = await response.text()
+
+                if response.status != 200:
+                    logger.info(f"[SEND TEXT] Error: {data}")
+                    return False
+
+                return True
+    except Exception as e:
+        logger.info(f"[SEND AUDIO] Error: {e}")
         return False
