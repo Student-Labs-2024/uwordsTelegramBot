@@ -77,3 +77,23 @@ async def send_audio(uwords_uid: str, file_path: str, filename: str, content_typ
     except Exception as e:
         logger.info(f"[SEND AUDIO] Error: {e}")
         return False
+
+
+async def send_promo(uwords_uid: str, promo: str):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=f"{APP_URL}/api/v1/user/promo",
+                headers={"Authorization": f"Bearer {APP_TOKEN}"},
+                json={"uwords_uid": uwords_uid, "promo": promo},
+            ) as response:
+                data = await response.text()
+
+                if response.status != 200:
+                    logger.info(f"[SEND PROMO] Error: {data}")
+                    return False
+
+                return True
+    except Exception as e:
+        logger.info(f"[SEND PROMO] Error: {e}")
+        return False
