@@ -102,6 +102,12 @@ async def audio_message(message: Message):
         logger.info(f"[MESSAGE] Error: {e}")
         return await message.answer(bot_messages.ERROR_MESSAGE)
 
+    finally:
+        try:
+            os.remove(download_path)
+        except:
+            pass
+
 
 async def main() -> None:
     global bot
