@@ -37,17 +37,17 @@ async def command_start(message: Message) -> None:
         uwords_uid = await check_code(code=code)
 
         if not uwords_uid:
-            return await message.answer(text=bot_messages.NOT_AUTHORIZED)
+            return await message.reply(text=bot_messages.NOT_AUTHORIZED)
 
         await create_user(telegram_id=message.from_user.id, uwords_uid=uwords_uid)
 
-        await message.answer(text=bot_messages.SUCCESSFULLY_REG)
+        await message.reply(text=bot_messages.SUCCESSFULLY_REG)
 
-        return await message.answer(text=bot_messages.GREETING_MESSAGE)
+        return await message.reply(text=bot_messages.GREETING_MESSAGE)
 
     except Exception as e:
         logger.info(f"[START] Error: {e}")
-        return await message.answer(text=bot_messages.ERROR_MESSAGE)
+        return await message.reply(text=bot_messages.ERROR_MESSAGE)
 
 
 @dp.message(lambda message: message.content_type == ContentType.TEXT)
@@ -55,18 +55,18 @@ async def text_message(message: Message):
     try:
         user = await get_user(telegram_id=message.from_user.id)
         if not user:
-            return await message.answer(bot_messages.NOT_AUTHORIZED)
+            return await message.reply(bot_messages.NOT_AUTHORIZED)
 
         is_send = await send_text(uwords_uid=user.uwords_uid, text=message.text)
 
         if not is_send:
-            return await message.answer(text=bot_messages.NOT_SUBSCRIBE)
+            return await message.reply(text=bot_messages.NOT_SUBSCRIBE)
 
-        return await message.answer(text=bot_messages.SEND_TEXT)
+        return await message.reply(text=bot_messages.SEND_TEXT)
 
     except Exception as e:
         logger.info(f"[MESSAGE] Error: {e}")
-        return await message.answer(bot_messages.ERROR_MESSAGE)
+        return await message.reply(bot_messages.ERROR_MESSAGE)
 
 
 @dp.message(lambda message: message.content_type == ContentType.VOICE)
@@ -74,7 +74,7 @@ async def audio_message(message: Message):
     try:
         user = await get_user(telegram_id=message.from_user.id)
         if not user:
-            return await message.answer(bot_messages.NOT_AUTHORIZED)
+            return await message.reply(bot_messages.NOT_AUTHORIZED)
 
         file_id = str(message.voice.file_id)
         file = await bot.get_file(file_id)
@@ -94,13 +94,12 @@ async def audio_message(message: Message):
         )
 
         if not is_send:
-            return await message.answer(text=bot_messages.NOT_SUBSCRIBE)
-
-        return await message.answer(text=bot_messages.SEND_AUDIO)
+            return await message.reply(text=bot_messages.NOT_SUBSCRIBE)
+        return await message.reply(text=bot_messages.SEND_AUDIO)
 
     except Exception as e:
         logger.info(f"[MESSAGE] Error: {e}")
-        return await message.answer(bot_messages.ERROR_MESSAGE)
+        return await message.reply(bot_messages.ERROR_MESSAGE)
 
     finally:
         try:
