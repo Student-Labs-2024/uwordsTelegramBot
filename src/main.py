@@ -112,6 +112,13 @@ async def text_message(message: Message):
     if user.state == "promocode":
         is_promo = await send_promo(uwords_uid=user.uwords_uid, promo=message.text)
 
+        try:
+            await bot.delete_message(
+                chat_id=message.chat.id, message_id=message.message_id
+            )
+        except:
+            pass
+
         if is_promo:
             await change_state(telegram_id=user.tg_user_id, state="default")
             return await message.reply(text=bot_messages.PROMO_SUCCESS)
