@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import User
@@ -33,6 +33,28 @@ async def get_user(telegram_id: int) -> User:
 
             stmt = select(User).filter(User.tg_user_id == telegram_id)
             res = await session.execute(stmt)
+
+            return res.scalar_one_or_none()
+
+    except Exception as e:
+        logger.info(f"[GET] Error: {e}")
+        return None
+
+
+async def change_state(telegram_id: int, state: str):
+    try:
+        async with async_session_maker() as session:
+            session: AsyncSession
+
+            stmt = (
+                update(User)
+                .filter(User.tg_user_id == telegram_id)
+                .values(state=state)
+                .returning(User)
+            )
+
+            res = await session.execute(stmt)
+            await session.commit()
 
             return res.scalar_one_or_none()
 
